@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubtomAI - Simulador Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .typing-dot {
+            animation: pulse-slow 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-screen flex flex-col font-sans overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-gray-900 border-b border-gray-800 p-4 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-violet-500/20">S</div>
+            <div>
+                <h1 class="font-bold text-lg text-white">SubtomAI <span class="text-xs px-2 py-0.5 bg-violet-900/60 text-violet-300 rounded-full border border-violet-700/50">Simulador v2.0</span></h1>
+                <p class="text-xs text-gray-400">Base de conocimiento con 1,000+ consultas indexadas</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3 text-sm text-gray-400">
+            <span class="hidden sm:inline bg-gray-800 px-3 py-1 rounded-full border border-gray-700 text-xs">Modo: Local / Simulado</span>
+            <button onclick="clearChat()" class="hover:text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg text-xs transition border border-gray-700">Limpiar chat</button>
+        </div>
+    </header>
+
+    <!-- Chat Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 max-w-4xl w-full mx-auto">
+        <!-- Welcome Message -->
+        <div class="flex items-start space-x-4">
+            <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0 font-bold text-sm">AI</div>
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 max-w-2xl text-gray-200 shadow-sm leading-relaxed">
+                <p>¡Hola! Soy tu simulador de IA con acceso a una base integrada de más de 1,000 preguntas y respuestas simuladas sobre programación, ciencia, cultura general, tecnología y curiosidades.</p>
+                <p class="mt-2 text-sm text-gray-400">Prueba a preguntarme algo o usa la barra inferior para escribir lo que quieras.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Input Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 p-4">
+        <form id="chat-form" onsubmit="handleSendMessage(event)" class="max-w-4xl mx-auto flex gap-3">
+            <input 
+                id="user-input" 
+                type="text" 
+                placeholder="Escribe tu pregunta (ej: '¿Qué es Python?', 'Háblame de física' o cualquier duda)..." 
+                class="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600 transition text-sm"
+                autocomplete="off"
+                required
+            >
+            <button 
+                type="submit" 
+                class="bg-violet-600 hover:bg-violet-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center justify-center shadow-lg shadow-violet-600/20 text-sm">
+                Enviar
+            </button>
+        </form>
+    </footer>
+
+    <script>
+        const categorias = [
+            { nombre: "Programación", keywords: ["python", "javascript", "codigo", "html", "css", "react", "bug", "git", "api", "base de datos", "sql", "linux", "servidor"] },
+            { nombre: "Ciencia", keywords: ["fisica", "quimica", "espacio", "universo", "planeta", "energia", "biologia", "cuantico", "gravedad", "celula"] },
+            { nombre: "Tecnología", keywords: ["ia", "inteligencia artificial", "blockchain", "ciberseguridad", "smartphone", "procesador", "nube", "quantum"] },
+            { nombre: "Cultura y Curiosidades", keywords: ["historia", "libro", "arte", "musica", "cine", "idioma", "filosofia", "deporte", "viaje"] }
+        ];
+
+        const baseConocimiento = [];
+        const temasBase = [
+            "Python", "JavaScript", "Inteligencia Artificial", "Física Cuántica", "Desarrollo Web", 
+            "Bases de Datos", "Ciberseguridad", "Algoritmos", "Astronomía", "Historia Antigua",
+            "Machine Learning", "Linux", "Redes", "Git", "Arquitectura de Software"
+        ];
+
+        for (let i = 1; i <= 1000; i++) {
+            let tema = temasBase[i % temasBase.length];
+            let subId = Math.floor(i / temasBase.length) + 1;
+            baseConocimiento.push({
+                id: i,
+                pregunta: `¿Cómo funciona el concepto número ${i} relacionado con ${tema.toLowerCase()} y su aplicación práctica ${subId}?`,
+                respuesta: `En el ámbito de ${tema}, el principio número ${i} se centra en optimizar procesos mediante patrones estandarizados. Al aplicar la regla #${subId}, se reduce la complejidad algorítmica y se mejora la mantenibilidad del sistema. Esto permite escalar proyectos complejos con mayor robustez y eficiencia.`
+            });
+        }
+
+        const faqExtra = [
+            { q: "hola", r: "¡Hola! ¿En qué puedo ayudarte hoy?" },
+            { q: "¿quién eres?", r: "Soy SubtomAI, un modelo simulado con más de 1,000 respuestas preconfiguradas para asistirte." },
+            { q: "¿qué hora es?", r: "La hora actual del sistema es: " + new Date().toLocaleTimeString() },
+            { q: "gracias", r: "¡De nada! Si necesitas algo más, aquí estoy." }
+        ];
+
+        faqExtra.forEach((item, index) => {
+            baseConocimiento.unshift({
+                id: 9999 + index,
+                pregunta: item.q,
+                respuesta: item.r
+            });
+        });
+
+        function buscarRespuesta(textoUsuario) {
+            const query = textoUsuario.toLowerCase().trim();
+            let match = baseConocimiento.find(item => query.includes(item.pregunta.toLowerCase()) || item.pregunta.toLowerCase().includes(query));
+            if (match) return match.respuesta;
+
+            for (let cat of categorias) {
+                for (let kw of cat.keywords) {
+                    if (query.includes(kw)) {
+                        let related = baseConocimiento.find(item => item.pregunta.toLowerCase().includes(kw));
+                        if (related) {
+                            return `Sobre tu interés en ${kw.toUpperCase()} (${cat.nombre}): ${related.respuesta}`;
+                        }
+                    }
+                }
+            }
+
+            return `He analizado tu consulta ("${textoUsuario}") en nuestra base de 1,000+ registros simulados. Aunque no hay una coincidencia exacta literal, el sistema correlaciona este tema con metodologías de análisis lógico y optimización. ¿Te gustaría profundizar en algún aspecto técnico específico?`;
+        }
+
+        const chatContainer = document.getElementById('chat-container');
+
+        function appendMessage(sender, text, isAI = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex items-start space-x-4 ${isAI ? '' : 'flex-row-reverse space-x-reverse'}`;
+            
+            let avatarBg = isAI ? 'bg-violet-600' : 'bg-emerald-600';
+            let avatarText = isAI ? 'AI' : 'US';
+            let bubbleBg = isAI ? 'bg-gray-900 border-gray-800 text-gray-200' : 'bg-violet-600 border-transparent text-white';
+
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-lg ${avatarBg} flex items-center justify-center flex-shrink-0 font-bold text-sm shadow">${avatarText}</div>
+                <div class="${bubbleBg} border rounded-2xl p-4 max-w-2xl shadow-sm leading-relaxed text-sm">
+                    <p>${text}</p>
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-start space-x-4';
+            typingDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0 font-bold text-sm">AI</div>
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex space-x-1.5 items-center">
+                    <div class="w-2 h-2 rounded-full bg-violet-400 typing-dot"></div>
+                    <div class="w-2 h-2 rounded-full bg-violet-400 typing-dot"></div>
+                    <div class="w-2 h-2 rounded-full bg-violet-400 typing-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('user-input');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            appendMessage('Tú', texto, false);
+            input.value = '';
+
+            showTypingIndicator();
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                const respuesta = buscarRespuesta(texto);
+                appendMessage('SubtomAI', respuesta, true);
+            }, 700);
+        }
+
+        function clearChat() {
+            chatContainer.innerHTML = `
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0 font-bold text-sm">AI</div>
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 max-w-2xl text-gray-200 shadow-sm leading-relaxed">
+                        <p>Chat reiniciado. ¿En qué te puedo ayudar ahora?</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
